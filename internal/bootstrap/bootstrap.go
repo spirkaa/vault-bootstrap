@@ -25,8 +25,6 @@ func Run() {
 		os.Exit(1)
 	}
 
-	//k8sConfig, _ := clientcmd.BuildConfigFromFlags("", os.Getenv("HOME")+"/.kube/config")
-
 	clientsetK8s, err := kubernetes.NewForConfig(k8sConfig)
 	if err != nil {
 		log.Error(err.Error())
@@ -129,7 +127,7 @@ func Run() {
 					}
 				}
 				// Check if vault secret unseal exists
-				_, err = getValuesFromK8sSecret(clientsetK8s, pVaultSecretRoot)
+				_, err = getValuesFromK8sSecret(clientsetK8s, pVaultSecretUnseal)
 				if err != nil {
 					// if it fails because secret is not found, create the secret
 					if errors.IsNotFound(err) {
