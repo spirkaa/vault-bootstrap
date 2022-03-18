@@ -91,6 +91,14 @@ func InitContainer() {
 									Name:  "VAULT_ENABLE_K8SAUTH",
 									Value: strconv.FormatBool(vaultK8sAuth),
 								},
+								{
+									Name:  "VAULT_SERVICE_ACCOUNT",
+									Value: vaultServiceAccount,
+								},
+								{
+									Name:  "VAULT_K8SAUTH_SERVICE_ACCOUNT",
+									Value: vaultK8sAuthServiceAccount,
+								},
 							},
 						},
 					},

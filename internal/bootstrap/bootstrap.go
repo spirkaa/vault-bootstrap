@@ -178,7 +178,7 @@ func Run() {
 
 		up := checkVaultUp(clientLB)
 		if !up {
-			panic("K8s authentication: Vault not ready. Cannot proceed")
+			panic("k8s auth: Vault not ready. Cannot proceed")
 		}
 
 		// set root token
@@ -189,7 +189,7 @@ func Run() {
 			os.Exit(1)
 		}
 		if k8sAuth {
-			log.Info("K8s authentication: Already enabled")
+			log.Info("k8s auth: Already enabled")
 			return
 		}
 		if err := configureK8sAuth(clientLB, clientsetK8s); err != nil {

@@ -36,9 +36,10 @@ var (
 	err                 error
 	ok                  bool
 
-	vaultServiceAccount string
-	vaultSecretRoot     string
-	vaultSecretUnseal   string
+	vaultServiceAccount        string
+	vaultK8sAuthServiceAccount string
+	vaultSecretRoot            string
+	vaultSecretUnseal          string
 )
 
 func init() {
@@ -127,6 +128,13 @@ func init() {
 		vaultServiceAccount = DefaultVaultServiceAccount
 	} else {
 		vaultServiceAccount = extrVaultServiceAccount
+	}
+
+	if extrVaultK8sAuthServiceAccount, ok := os.LookupEnv("VAULT_K8SAUTH_SERVICE_ACCOUNT"); !ok {
+		log.Warn("VAULT_K8SAUTH_SERVICE_ACCOUNT not set. Defaulting to ", DefaultVaultServiceAccount)
+		vaultK8sAuthServiceAccount = DefaultVaultServiceAccount
+	} else {
+		vaultK8sAuthServiceAccount = extrVaultK8sAuthServiceAccount
 	}
 
 	if extrVaultSecretRoot, ok := os.LookupEnv("VAULT_SECRET_ROOT"); !ok {
