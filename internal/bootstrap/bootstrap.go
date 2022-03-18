@@ -17,7 +17,6 @@ import (
 
 // Run Vault bootstrap
 func Run() {
-
 	// Create clientSet for k8s client-go
 	k8sConfig, err := rest.InClusterConfig()
 	if err != nil {
@@ -64,10 +63,6 @@ func Run() {
 		podFqdn, _ := url.Parse(member)
 		pod.fqdn = member
 		pod.name = strings.Split(podFqdn.Hostname(), ".")[0]
-		// Define main client (vault-0) which will be used for initialization
-		// When using integrated RAFT storage, the vault cluster member that is initialized
-		// needs to be first one which is unsealed
-		// In the unseal part we'll always start with the first member
 		clientConfig := &vault.Config{
 			Address: pod.fqdn,
 		}
@@ -94,8 +89,6 @@ func Run() {
 
 	pVaultSecretRoot := &vaultSecretRoot
 	pVaultSecretUnseal := &vaultSecretUnseal
-
-	// Start with initialization
 
 	if vaultInit {
 		init, err := checkInit(vaultFirstPod)

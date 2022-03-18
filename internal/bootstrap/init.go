@@ -26,7 +26,6 @@ const (
 var (
 	namespace           string
 	vaultAddr           string
-	vaultClusterSize    int
 	vaultClusterMembers string
 	vaultKeyShares      int
 	vaultKeyThreshold   int
@@ -43,9 +42,6 @@ var (
 )
 
 func init() {
-
-	// Extract namespace: https://github.com/kubernetes/kubernetes/pull/63707
-	// Try to extract via Downwards API
 	if namespace, ok = os.LookupEnv("NAMESPACE"); !ok {
 		// Fall back to namespace of the service account
 		if data, err := ioutil.ReadFile("/var/run/secrets/kubernetes.io/serviceaccount/namespace"); err == nil {
@@ -53,16 +49,19 @@ func init() {
 		}
 	}
 
-	if vaultAddr, ok := os.LookupEnv("VAULT_ADDR"); !ok {
+	if extrVaultAddr, ok := os.LookupEnv("VAULT_ADDR"); !ok {
 		log.Warn("VAULT_ADDR not set. Defaulting to ", DefaultVaultAddr)
 		vaultAddr = DefaultVaultAddr
-		os.Setenv("VAULT_ADDR", vaultAddr)
+	} else {
+		vaultAddr = extrVaultAddr
 	}
-	vaultClusterMembers, ok = os.LookupEnv("VAULT_CLUSTER_MEMBERS")
-	if !ok {
+	os.Setenv("VAULT_ADDR", vaultAddr)
+
+	if vaultClusterMembers, ok = os.LookupEnv("VAULT_CLUSTER_MEMBERS"); !ok {
 		log.Warn("VAULT_CLUSTER_MEMBERS not set. Defaulting to ", DefaultVaultClusterMembers)
 		vaultClusterMembers = DefaultVaultClusterMembers
 	}
+
 	if extrVaultKeyShares, ok := os.LookupEnv("VAULT_KEY_SHARES"); !ok {
 		log.Warn("VAULT_KEY_SHARES not set. Defaulting to ", DefaultVaultKeyShares)
 		vaultKeyShares = DefaultVaultKeyShares
@@ -72,6 +71,7 @@ func init() {
 			log.Error("Invalid value for VAULT_KEY_SHARES" + err.Error())
 		}
 	}
+
 	if extrVaultKeyThreshold, ok := os.LookupEnv("VAULT_KEY_THRESHOLD"); !ok {
 		log.Warn("VAULT_KEY_THRESHOLD not set. Defaulting to ", DefaultVaultKeyThreshold)
 		vaultKeyThreshold = DefaultVaultKeyThreshold
@@ -81,6 +81,7 @@ func init() {
 			log.Error("Invalid value for VAULT_KEY_THRESHOLD" + err.Error())
 		}
 	}
+
 	if extrVaultInit, ok := os.LookupEnv("VAULT_ENABLE_INIT"); !ok {
 		log.Warn("VAULT_ENABLE_INIT not set. Defaulting to ", DefaultVaultInit)
 		vaultInit = DefaultVaultInit
@@ -90,6 +91,7 @@ func init() {
 			log.Error("Invalid value for VAULT_ENABLE_INIT" + err.Error())
 		}
 	}
+
 	if extrVaultK8sSecret, ok := os.LookupEnv("VAULT_ENABLE_K8SSECRET"); !ok {
 		log.Warn("VAULT_ENABLE_K8SSECRET not set. Defaulting to ", DefaultVaultK8sSecret)
 		vaultK8sSecret = DefaultVaultK8sSecret
@@ -99,6 +101,7 @@ func init() {
 			log.Error("Invalid value for VAULT_ENABLE_K8SSECRET" + err.Error())
 		}
 	}
+
 	if extrVaultUnseal, ok := os.LookupEnv("VAULT_ENABLE_UNSEAL"); !ok {
 		log.Warn("VAULT_ENABLE_UNSEAL not set. Defaulting to ", DefaultVaultUnseal)
 		vaultUnseal = DefaultVaultUnseal
@@ -108,6 +111,7 @@ func init() {
 			log.Error("Invalid value for VAULT_ENABLE_UNSEAL" + err.Error())
 		}
 	}
+
 	if extrVaultK8sAuth, ok := os.LookupEnv("VAULT_ENABLE_K8SAUTH"); !ok {
 		log.Warn("VAULT_ENABLE_K8SAUTH not set. Defaulting to ", DefaultVaultK8sAuth)
 		vaultK8sAuth = DefaultVaultK8sAuth
@@ -117,6 +121,7 @@ func init() {
 			log.Error("Invalid value for VAULT_ENABLE_K8SAUTH" + err.Error())
 		}
 	}
+
 	if extrVaultServiceAccount, ok := os.LookupEnv("VAULT_SERVICE_ACCOUNT"); !ok {
 		log.Warn("VAULT_SERVICE_ACCOUNT not set. Defaulting to ", DefaultVaultServiceAccount)
 		vaultServiceAccount = DefaultVaultServiceAccount
@@ -130,6 +135,7 @@ func init() {
 	} else {
 		vaultSecretRoot = extrVaultSecretRoot
 	}
+
 	if extrVaultSecretUnseal, ok := os.LookupEnv("VAULT_SECRET_UNSEAL"); !ok {
 		log.Warn("VAULT_SECRET_UNSEAL not set. Defaulting to ", DefaultVaultSecretUnseal)
 		vaultSecretUnseal = DefaultVaultSecretUnseal

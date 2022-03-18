@@ -13,7 +13,7 @@ import (
 	"k8s.io/client-go/kubernetes"
 )
 
-func checkVaultUp(client *vault.Client) (bool) {
+func checkVaultUp(client *vault.Client) bool {
 	for i := 0; i < 5; i++ {
 		hr, err := client.Sys().Health()
 		if err != nil {
@@ -30,18 +30,19 @@ func checkVaultUp(client *vault.Client) (bool) {
 	}
 	return false
 }
+
 func checkK8sAuth(client *vault.Client) (bool, error) {
 	auths, err := client.Logical().Read("sys/auth")
 	if err != nil {
 		return false, err
 	}
-	if k8sAuth, _ := auths.Data["kubernetes/"]; k8sAuth != nil {
+	if k8sAuth := auths.Data["kubernetes/"]; k8sAuth != nil {
 		return true, nil
 	}
 	return false, nil
 }
-func configureK8sAuth(client *vault.Client, clientsetK8s *kubernetes.Clientset) error {
 
+func configureK8sAuth(client *vault.Client, clientsetK8s *kubernetes.Clientset) error {
 	// Enable K8S authentication
 	err := client.Sys().EnableAuthWithOptions("kubernetes/", &vault.EnableAuthOptions{
 		Type: "kubernetes",
@@ -54,7 +55,7 @@ func configureK8sAuth(client *vault.Client, clientsetK8s *kubernetes.Clientset) 
 	saClient := clientsetK8s.CoreV1().ServiceAccounts(namespace)
 	saClientVault, err := saClient.Get(context.TODO(), vaultServiceAccount, metav1.GetOptions{})
 	if err != nil {
-		return fmt.Errorf("K8s authentication: Cant't get vault service account - ", err.Error())
+		return fmt.Errorf("k8s authentication: Cant't get vault service account - %s", err.Error())
 	}
 
 	secretSaVaultName := saClientVault.Secrets[0].Name
@@ -62,7 +63,7 @@ func configureK8sAuth(client *vault.Client, clientsetK8s *kubernetes.Clientset) 
 
 	secretSaVault, err := clientsetK8s.CoreV1().Secrets(namespace).Get(context.TODO(), secretSaVaultName, metav1.GetOptions{})
 	if err != nil {
-		return fmt.Errorf("K8s authentication: Cant't get secret for vault service account - ", err.Error())
+		return fmt.Errorf("k8s authentication: Cant't get secret for vault service account - %s", err.Error())
 	}
 	vaultJwt := secretSaVault.Data["token"]
 
@@ -75,7 +76,7 @@ func configureK8sAuth(client *vault.Client, clientsetK8s *kubernetes.Clientset) 
 	// Get K8S API URL
 	k8sApiHost, ok := os.LookupEnv("KUBERNETES_PORT_443_TCP_ADDR")
 	if !ok {
-		return fmt.Errorf("K8s authentication: Invalid Kubernetes API config")
+		return fmt.Errorf("k8s authentication: Invalid Kubernetes API config")
 	}
 
 	k8sApiUrl := fmt.Sprintf("https://%s:443", k8sApiHost)

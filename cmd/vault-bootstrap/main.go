@@ -11,7 +11,6 @@ import (
 )
 
 func main() {
-
 	runningMode := flag.String("mode", "job", "running mode: job or init-container")
 	flag.Parse()
 	if *runningMode == "job" {
@@ -26,7 +25,6 @@ func main() {
 }
 
 func init() {
-
 	const DefaultLogLevel = "Info"
 
 	logLevel, ok := os.LookupEnv("LOG_LEVEL")
@@ -40,10 +38,8 @@ func init() {
 
 	// Output everything including stderr to stdout
 	log.SetOutput(os.Stdout)
-
-	// set level
 	log.SetLevel(level)
-	log.Info("LogLevel set to " + level.String())
 
+	log.Info("LogLevel set to " + level.String())
 	log.Info(runtime.Version())
 }

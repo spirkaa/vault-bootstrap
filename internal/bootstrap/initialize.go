@@ -18,7 +18,6 @@ func checkInit(pod vaultPod) (bool, error) {
 }
 
 func operatorInit(pod vaultPod) (*string, *[]string, error) {
-
 	initReq := &vault.InitRequest{
 		SecretShares:    vaultKeyShares,
 		SecretThreshold: vaultKeyThreshold,
