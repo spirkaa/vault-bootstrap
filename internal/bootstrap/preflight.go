@@ -9,9 +9,6 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-// codes defined by /sys/health
-// if any of those codes, Vault is up
-
 func preflight(vaultPods []vaultPod) {
 	c := make(chan string, len(vaultPods))
 	for _, pod := range vaultPods {

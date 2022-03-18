@@ -4,75 +4,74 @@ This Go Tool can be used to initialize Vault. It can perform the following steps
 
 * Vault initilazation
 * Save Root Token and Unseal Keys to K8s Secret
-* Vault unseal 
+* Vault unseal
 * Enable Kubernetes authentication
 
 ## Disclaimer
-In this version, the Vault token and unseal Keys can only be saved to a Kubernetes secret. This is insecure and this deployment is *ONLY SUITED FOR DEVELOPMENT ENVIRONMENTS*.
-However, this tool can be extended to save Vault token and unseal Keys to a different secret engine (Azure Key Vault, AWS KMS, another Vault instance). 
+In this version, the Vault token and unseal Keys can only be saved to a Kubernetes secret.
+This is insecure and this deployment is *ONLY SUITED FOR DEVELOPMENT ENVIRONMENTS*.
+However, this tool can be extended to save Vault token and unseal Keys to a different secret engine (Azure Key Vault, AWS KMS, another Vault instance).
 
 ## Usage
 
-The container image is hosted at quay.io in the following repo: *quay.io/radudd/vault-bootstrap*
+The container image is hosted at Docker Hub: *spirkaa/vault-bootstrap*
 
-### Scenario 1 - Bootstrap Vault 
+### Scenario 1 - Bootstrap Vault
 To install Vault Bootstrap to OpenShift or Kubernetes, deploy the following Job:
 
 ```
-cat <<EOF | oc apply -f 
-
-kind: Job
+cat <<EOF | oc apply -f
 apiVersion: batch/v1
+kind: Job
 metadata:
   name: vault-init
+  namespace: vault
 spec:
+  backoffLimit: 3
   template:
-    metadata:
-      name: vault-init
-        job-name: vault-init
     spec:
+      serviceAccount: vault-init
+      restartPolicy: Never
       containers:
-        - name: vault-init
-          image: quay.io/radudd/vault-bootstrap
-          command:
-            - /app/vault-bootstrap
-          env:
-            - name: NAMESPACE
-              valueFrom:
-                fieldRef:
-                  fieldPath: metadata.namespace
-            - name: VAULT_ADDR
-              value: 'https://vault.hashicorp-vault.svc:8200'
-            - name: VAULT_CLUSTER_MEMBERS
-              value: >-
-                https://vault-0.vault-internal:8200,https://vault-1.vault-internal:8200,https://vault-2.vault-internal:8200
-            - name: VAULT_KEY_SHARES
-              value: '5'
-            - name: VAULT_KEY_THRESHOLD
-              value: '3'
-            - name: VAULT_ENABLE_INIT
-              value: 'true'
-            - name: VAULT_ENABLE_K8SSECRET
-              value: 'true'
-            - name: VAULT_ENABLE_UNSEAL
-              value: 'true'
-            - name: VAULT_ENABLE_K8SAUTH
-              value: 'true'
-          imagePullPolicy: Always
-      serviceAccountName: vault
-      serviceAccount: vault
+      - name: vault-init
+        image: spirkaa/vault-bootstrap
+        env:
+        - name: VAULT_ADDR
+          value: 'https://vault.vault:8200'
+        - name: VAULT_CLUSTER_MEMBERS
+          value: >-
+            https://vault-0.vault-internal:8200,https://vault-1.vault-internal:8200,https://vault-2.vault-internal:8200
+        - name: VAULT_KEY_SHARES
+          value: '5'
+        - name: VAULT_KEY_THRESHOLD
+          value: '3'
+        - name: VAULT_ENABLE_INIT
+          value: 'true'
+        - name: VAULT_ENABLE_K8SSECRET
+          value: 'true'
+        - name: VAULT_ENABLE_UNSEAL
+          value: 'true'
+        - name: VAULT_ENABLE_K8SAUTH
+          value: 'true'
+        - name: NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+        imagePullPolicy: Always
 EOF
 ```
 
-If you are choosing to save the root token and unseal keys into a Kubernetes secret, you can re-run the init job for unsealing any of the pods (in case in gets rescheduled). To do this, run the following command
+If you are choosing to save the root token and unseal keys into a Kubernetes secret,
+you can re-run the init job for unsealing any of the pods (in case in gets rescheduled).
+To do this, run the following command
 
 ```
 oc get job vault-init -o json | jq 'del(.spec.selector)' | jq 'del(.spec.template.metadata.labels)' | oc replace --force -f -
 ```
 
 ### Scenario 2 - init Container for unsealing
-This tool can be run in `init-container` mode, which can be used if we want to perform auto-unsealing from K8s secret. 
-In this mode, the initContainer will spawn up a `vault-bootstrap` job configured to perform only unsealing only for the podis attached to. 
+This tool can be run in `init-container` mode, which can be used if we want to perform auto-unsealing from K8s secret.
+In this mode, the initContainer will spawn up a `vault-bootstrap` job configured to perform only unsealing only for the podis attached to.
 To perform this scenario, add the following definition to the Vault StatefulSet definition
 
 ```
@@ -102,7 +101,7 @@ To perform this scenario, add the following definition to the Vault StatefulSet 
             - name: VAULT_K8S_NAMESPACE
               valueFrom:
                 fieldRef:
-                  fieldPath: metadata.namespace  
+                  fieldPath: metadata.namespace
 ```
 
 ## Configuration

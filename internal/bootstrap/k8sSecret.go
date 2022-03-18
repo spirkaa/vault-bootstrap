@@ -18,11 +18,9 @@ func getValuesFromK8sSecret(clientsetK8s *kubernetes.Clientset, secretName *stri
 		return nil, err
 	}
 	vaultSecretData := string(secretVault.Data["vaultData"])
-	//unsealKeys := strings.Split(string(secretVault.Data["unsealKeys"]), ";")
 	return &vaultSecretData, nil
 }
 
-//func createK8sSecret(rootToken *string, unsealKeys *[]string, clientsetK8s *kubernetes.Clientset) error {
 func createK8sSecret(clientsetK8s *kubernetes.Clientset, secretName *string, vaultSecretData *string) error {
 	secretClient := clientsetK8s.CoreV1().Secrets(namespace)
 	secret := &apiv1.Secret{
@@ -32,7 +30,6 @@ func createK8sSecret(clientsetK8s *kubernetes.Clientset, secretName *string, vau
 		Type: apiv1.SecretTypeOpaque,
 		StringData: map[string]string{
 			"vaultData": *vaultSecretData,
-			//"unsealKeys": strings.Join(*unsealKeys, ";"),
 		},
 	}
 

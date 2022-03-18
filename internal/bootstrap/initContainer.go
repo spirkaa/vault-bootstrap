@@ -26,8 +26,6 @@ func InitContainer() {
 		os.Exit(1)
 	}
 
-	//k8sConfig, _ := clientcmd.BuildConfigFromFlags("", os.Getenv("HOME")+"/.kube/config")
-
 	clientsetK8s, err := kubernetes.NewForConfig(k8sConfig)
 	if err != nil {
 		log.Error(err.Error())
