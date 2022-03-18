@@ -149,18 +149,18 @@ func Run() {
 		}
 	}
 
-	// Check if unseal keys in memory and if not load them
-	if unsealKeys == nil {
-		unsealKeysString, err := getValuesFromK8sSecret(clientsetK8s, pVaultSecretUnseal)
-		if err != nil {
-			panic("Cannot load Unseal Keys")
-		}
-		npUnsealKeys := strings.Split(*unsealKeysString, ";")
-		unsealKeys = &npUnsealKeys
-		log.Debug("Unseal Keys loaded successfully")
-	}
-
 	if vaultUnseal {
+		// Check if unseal keys in memory and if not load them
+		if unsealKeys == nil {
+			unsealKeysString, err := getValuesFromK8sSecret(clientsetK8s, pVaultSecretUnseal)
+			if err != nil {
+				panic("Cannot load Unseal Keys")
+			}
+			npUnsealKeys := strings.Split(*unsealKeysString, ";")
+			unsealKeys = &npUnsealKeys
+			log.Debug("Unseal Keys loaded successfully")
+		}
+
 		unsealed := unsealMember(vaultFirstPod, *unsealKeys)
 		if unsealed {
 			log.Debugf("Waiting 15 seconds after unsealing first member...")
@@ -172,6 +172,17 @@ func Run() {
 	}
 
 	if vaultK8sAuth {
+		// Check if root token in memory and if not load it
+		if rootToken == nil {
+			pRootToken, err := getValuesFromK8sSecret(clientsetK8s, pVaultSecretRoot)
+			if err != nil {
+				panic("Cannot load Root Token")
+			}
+			rootTokenVal := *pRootToken
+			rootToken = &rootTokenVal
+			log.Debug("Root Token loaded successfully")
+		}
+
 		up := checkVaultUp(clientLB)
 		if !up {
 			panic("K8s authentication: Vault not ready. Cannot proceed")
