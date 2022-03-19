@@ -1,5 +1,7 @@
 # Vault Bootstrap
 
+Alternative: [kubevault/unsealer](https://github.com/kubevault/unsealer)
+
 ## About
 
 This tool can be used to initialize

@@ -2,7 +2,6 @@ package bootstrap
 
 import (
 	"strconv"
-	"time"
 
 	vault "github.com/hashicorp/vault/api"
 	log "github.com/sirupsen/logrus"
@@ -44,7 +43,7 @@ out:
 		log.Infof("%s: Starting unsealing", pod.name)
 		// Loop through the keys and unseal
 		for j := 0; j < vaultKeyThreshold; j++ {
-			time.Sleep(2 * time.Second)
+			// time.Sleep(2 * time.Second)
 			sealStatus, err = pod.client.Sys().Unseal(unsealKeys[j])
 			if err != nil {
 				log.Infof("%s: %s", pod.name, err.Error())

@@ -165,7 +165,7 @@ func Run() {
 		unsealed := unsealMember(vaultFirstPod, *unsealKeys)
 		if unsealed {
 			log.Debugf("Waiting 15 seconds after unsealing first member...")
-			time.Sleep(15 * time.Second)
+			// time.Sleep(15 * time.Second)
 		}
 		for _, vaultPod := range vaultPods[1:] {
 			unsealMember(vaultPod, *unsealKeys)
@@ -189,20 +189,43 @@ func Run() {
 			panic("k8s auth: Vault not ready. Cannot proceed")
 		}
 
-		// set root token
+		// enable k8s auth
 		clientLB.SetToken(*rootToken)
 		k8sAuth, err := checkK8sAuth(clientLB)
 		if err != nil {
 			log.Errorf(err.Error())
 			os.Exit(1)
 		}
-		if k8sAuth {
-			log.Info("k8s auth: Already enabled")
-			return
+		if !k8sAuth {
+			if err := configureK8sAuth(clientLB, clientsetK8s); err != nil {
+				log.Error(err.Error())
+				os.Exit(1)
+			}
 		}
-		if err := configureK8sAuth(clientLB, clientsetK8s); err != nil {
+
+		// configure policy and role
+		if err := configurePolicy(clientLB, &vaultSaPolicyOptions{
+			name:        vaultK8sAuthServiceAccount,
+			saName:      vaultK8sAuthServiceAccount,
+			saNamespace: namespace,
+		}); err != nil {
 			log.Error(err.Error())
 			os.Exit(1)
 		}
+
+		// enable secret engine
+		secret, err := checkSecretEngine(clientLB)
+		if err != nil {
+			log.Errorf(err.Error())
+			os.Exit(1)
+		}
+		if !secret {
+			if err := enableSecretEngine(clientLB); err != nil {
+				log.Error(err.Error())
+				os.Exit(1)
+			}
+		}
+
+		return
 	}
 }

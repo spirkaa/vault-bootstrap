@@ -37,6 +37,7 @@ func checkK8sAuth(client *vault.Client) (bool, error) {
 		return false, err
 	}
 	if k8sAuth := auths.Data["kubernetes/"]; k8sAuth != nil {
+		log.Info("k8s auth already enabled")
 		return true, nil
 	}
 	return false, nil
