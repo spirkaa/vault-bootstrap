@@ -9,11 +9,19 @@ import (
 
 	vault "github.com/hashicorp/vault/api"
 	log "github.com/sirupsen/logrus"
+	apiv1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
 )
+
+func getPodName(p *apiv1.Pod) string {
+	if p.ObjectMeta.Name != "" {
+		return p.ObjectMeta.Name
+	}
+	return strings.TrimSuffix(p.ObjectMeta.GenerateName, "-")
+}
 
 // Run Vault bootstrap
 func Run() {

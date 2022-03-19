@@ -7,7 +7,7 @@ import (
 	"strings"
 
 	log "github.com/sirupsen/logrus"
-	"github.com/spirkaa/vault-bootstrap/internal/bootstrap"
+	"github.com/spirkaa/vault-bootstrap/bootstrap"
 )
 
 func main() {

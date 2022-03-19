@@ -9,6 +9,17 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
+var vaultReadyStatusCodes = []int{200, 501, 503, 429, 472, 473}
+
+func find(slice []int, val int) bool {
+	for _, item := range slice {
+		if item == val {
+			return true
+		}
+	}
+	return false
+}
+
 func preflight(vaultPods []vaultPod) {
 	c := make(chan string, len(vaultPods))
 	for _, pod := range vaultPods {

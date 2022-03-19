@@ -9,7 +9,7 @@ RUN go mod download
 
 COPY . .
 
-RUN CGO_ENABLED=0 go build -o /vault-bootstrap ./cmd/vault-bootstrap/main.go
+RUN CGO_ENABLED=0 go build -o /vault-bootstrap
 
 ## Deploy
 FROM scratch
