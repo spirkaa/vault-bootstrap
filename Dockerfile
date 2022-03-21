@@ -14,6 +14,8 @@ RUN CGO_ENABLED=0 go build -o /vault-bootstrap
 ## Deploy
 FROM scratch
 
+LABEL org.opencontainers.image.description="Init and unseal Hashicorp Vault on Kubernetes"
+
 WORKDIR /
 
 COPY --from=build /vault-bootstrap .

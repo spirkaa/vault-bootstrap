@@ -23,8 +23,8 @@ However, this tool can be extended to save Vault token and unseal Keys to a diff
 
 ## Usage
 
-The container image is hosted at Docker Hub:
-*[spirkaa/vault-bootstrap](https://hub.docker.com/r/spirkaa/vault-bootstrap)*
+Docker Image:
+[ghcr.io/spirkaa/vault-bootstrap](https://github.com/spirkaa/vault-bootstrap/pkgs/container/vault-bootstrap)*
 
 ### Scenario 1 - Job
 
@@ -45,7 +45,7 @@ spec:
       restartPolicy: Never
       containers:
       - name: vault-init
-        image: spirkaa/vault-bootstrap:latest
+        image: ghcr.io/spirkaa/vault-bootstrap:latest
         env:
         - name: VAULT_ADDR
           value: "https://vault.vault:8200"
@@ -147,7 +147,7 @@ To perform this scenario, add the following definition to the Vault StatefulSet 
 ```yaml
 initContainers:
 - name: vault-bootstrap
-  image: spirkaa/vault-bootstrap:latest
+  image: ghcr.io/spirkaa/vault-bootstrap:latest
   command:
     - /vault-bootstrap
   args:
