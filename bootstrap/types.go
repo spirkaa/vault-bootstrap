@@ -8,7 +8,7 @@ type vaultPod struct {
 	client *vault.Client
 }
 
-type vaultSaPolicyOptions struct {
+type vaultSaRole struct {
 	name        string
 	saName      string
 	saNamespace string

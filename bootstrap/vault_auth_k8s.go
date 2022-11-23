@@ -3,7 +3,6 @@ package bootstrap
 import (
 	"context"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"time"
 
@@ -68,7 +67,7 @@ func configureK8sAuth(client *vault.Client, clientsetK8s *kubernetes.Clientset) 
 	vaultJwt := secretSaVault.Data["token"]
 
 	// Fetch CA for connecting to k8s API
-	cacert, err := ioutil.ReadFile("/var/run/secrets/kubernetes.io/serviceaccount/ca.crt")
+	cacert, err := os.ReadFile("/var/run/secrets/kubernetes.io/serviceaccount/ca.crt")
 	if err != nil {
 		return err
 	}

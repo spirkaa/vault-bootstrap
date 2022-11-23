@@ -1,7 +1,6 @@
 package bootstrap
 
 import (
-	"io/ioutil"
 	"os"
 	"strconv"
 	"strings"
@@ -45,7 +44,7 @@ var (
 func init() {
 	if namespace, ok = os.LookupEnv("NAMESPACE"); !ok {
 		// Fall back to namespace of the service account
-		if data, err := ioutil.ReadFile("/var/run/secrets/kubernetes.io/serviceaccount/namespace"); err == nil {
+		if data, err := os.ReadFile("/var/run/secrets/kubernetes.io/serviceaccount/namespace"); err == nil {
 			namespace = strings.TrimSpace(string(data))
 		}
 	}

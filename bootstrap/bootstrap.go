@@ -203,14 +203,25 @@ func Run() {
 			}
 		}
 
-		// configure policy and role
-		if err := configurePolicy(clientLB, &vaultSaPolicyOptions{
-			name:        vaultK8sAuthServiceAccount,
-			saName:      vaultK8sAuthServiceAccount,
-			saNamespace: namespace,
-		}); err != nil {
+		// add policy
+		if err := addPolicy(clientLB); err != nil {
 			log.Error(err.Error())
 			os.Exit(1)
+		}
+
+		// add roles
+		roleFromVars := vaultSaRole{
+			vaultK8sAuthServiceAccount,
+			vaultK8sAuthServiceAccount,
+			namespace,
+		}
+		saRoles = append(saRoles, roleFromVars)
+		log.Infof("%s", saRoles)
+		for _, role := range saRoles {
+			if err := addRole(clientLB, &role); err != nil {
+				log.Error(err.Error())
+				os.Exit(1)
+			}
 		}
 
 		// enable secret engine
