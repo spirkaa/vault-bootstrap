@@ -9,6 +9,7 @@ import (
 )
 
 const (
+	DefaultLogLevel            = "Info"
 	DefaultVaultAddr           = "https://vault:8200"
 	DefaultVaultClusterMembers = "https://vault:8200"
 	DefaultVaultKeyShares      = 1
@@ -23,6 +24,7 @@ const (
 )
 
 var (
+	logLevel            string
 	namespace           string
 	vaultAddr           string
 	vaultClusterMembers string
@@ -42,6 +44,12 @@ var (
 )
 
 func init() {
+	if extrLogLevel, ok := os.LookupEnv("LOG_LEVEL"); !ok {
+		logLevel = DefaultLogLevel
+	} else {
+		logLevel = extrLogLevel
+	}
+
 	if namespace, ok = os.LookupEnv("NAMESPACE"); !ok {
 		// Fall back to namespace of the service account
 		if data, err := os.ReadFile("/var/run/secrets/kubernetes.io/serviceaccount/namespace"); err == nil {

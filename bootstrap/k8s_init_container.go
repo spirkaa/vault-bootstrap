@@ -60,6 +60,10 @@ func InitContainer() {
 							Image: JobImage,
 							Env: []corev1.EnvVar{
 								{
+									Name:  "LOG_LEVEL",
+									Value: logLevel,
+								},
+								{
 									Name:  "VAULT_ADDR",
 									Value: vaultAddr,
 								},
