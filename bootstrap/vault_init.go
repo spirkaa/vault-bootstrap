@@ -41,6 +41,23 @@ func operatorInit(pod vaultPod) (*string, *[]string, error) {
 	return &initResp.RootToken, &initResp.Keys, nil
 }
 
+func operatorRaftJoin(pod vaultPod, leader vaultPod) error {
+	log.Debugf("%s: raft join", pod.name)
+	joinReq := &vault.RaftJoinRequest{
+		LeaderAPIAddr: leader.fqdn,
+	}
+	joinResp, err := pod.client.Sys().RaftJoin(joinReq)
+	if err != nil {
+		return err
+	}
+	if joinResp == nil || !joinResp.Joined {
+		return fmt.Errorf("nil or negative response from raft join request: %v", joinResp)
+	}
+
+	log.Infof("%s: node successfully joined raft", pod.name)
+	return nil
+}
+
 // log tokens to K8s log if you don't want to save it in a secret
 func logTokens(rootToken *string, unsealKeys *[]string) {
 	tokenLog := fmt.Sprintf("Root Token: %s", *rootToken)

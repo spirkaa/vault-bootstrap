@@ -164,10 +164,14 @@ func Run() {
 
 		unsealed := unsealMember(vaultFirstPod, *unsealKeys)
 		if unsealed {
-			log.Debugf("Waiting 15 seconds after unsealing first member...")
-			// time.Sleep(15 * time.Second)
+			log.Debugf("Waiting 5 seconds after unsealing first member...")
+			time.Sleep(5 * time.Second)
 		}
 		for _, vaultPod := range vaultPods[1:] {
+			if err := operatorRaftJoin(vaultPod, vaultFirstPod); err != nil {
+				log.Error(err.Error())
+				os.Exit(1)
+			}
 			unsealMember(vaultPod, *unsealKeys)
 		}
 	}
