@@ -16,10 +16,13 @@ build:
 	@go build -v -o ${IMAGE_NAME}
 
 build-image:
-	@DOCKER_BUILDKIT=1 docker build -t $(IMAGE_REPO)/$(IMAGE_NAME):$(IMAGE_TAG) .
+	@DOCKER_BUILDKIT=1 docker build \
+		--tag $(IMAGE_REPO)/$(IMAGE_NAME):$(IMAGE_TAG) \
+		--tag $(IMAGE_REPO)/$(IMAGE_NAME):latest \
+		-f local.Dockerfile \
+		.
 
 push-image: build-image
-	@docker tag $(IMAGE_REPO)/$(IMAGE_NAME):$(IMAGE_TAG) $(IMAGE_REPO)/$(IMAGE_NAME):latest
 	@docker push $(IMAGE_REPO)/$(IMAGE_NAME):$(IMAGE_TAG)
 	@docker push $(IMAGE_REPO)/$(IMAGE_NAME):latest
 
