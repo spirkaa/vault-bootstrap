@@ -27,18 +27,21 @@ func operatorInit(pod vaultPod) (*string, *[]string, error) {
 		return nil, nil, err
 	}
 
-	time.Sleep(5 * time.Second)
-	init, err := pod.client.Sys().InitStatus()
-	if err != nil {
-		log.Errorf(err.Error())
-		panic("Cannot proceed. Vault not initialized")
+	for i := 0; i < 15; i++ {
+		init, err := checkInit(pod)
+		if err != nil {
+			log.Errorf(err.Error())
+			time.Sleep(1 * time.Second)
+			continue
+		}
+		if !init {
+			time.Sleep(1 * time.Second)
+			continue
+		}
+		log.Infof("%s: vault successfully initialized", pod.name)
+		return &initResp.RootToken, &initResp.Keys, nil
 	}
-	if !init {
-		panic("Cannot proceed. Vault not initialized")
-	}
-
-	log.Infof("%s: Vault successfully initialized", pod.name)
-	return &initResp.RootToken, &initResp.Keys, nil
+	panic("Cannot proceed. Vault not initialized")
 }
 
 func operatorRaftJoin(pod vaultPod, leader vaultPod) error {

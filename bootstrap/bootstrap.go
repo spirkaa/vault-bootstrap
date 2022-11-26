@@ -5,7 +5,6 @@ import (
 	"net/url"
 	"os"
 	"strings"
-	"time"
 
 	vault "github.com/hashicorp/vault/api"
 	log "github.com/sirupsen/logrus"
@@ -90,8 +89,6 @@ func Run() {
 	vaultFirstPod := vaultPods[0]
 	preflight(vaultPods)
 
-	time.Sleep(5 * time.Second)
-
 	var rootToken *string
 	var unsealKeys *[]string
 
@@ -101,7 +98,6 @@ func Run() {
 	if vaultInit {
 		init, err := checkInit(vaultFirstPod)
 		if err != nil {
-			log.Debugf("Starting bootstrap")
 			log.Errorf(err.Error())
 			os.Exit(1)
 		}
@@ -161,12 +157,8 @@ func Run() {
 			unsealKeys = &npUnsealKeys
 			log.Debug("Unseal Keys loaded successfully")
 		}
-
-		unsealed := unsealMember(vaultFirstPod, *unsealKeys)
-		if unsealed {
-			log.Debugf("Waiting 5 seconds after unsealing first member...")
-			time.Sleep(5 * time.Second)
-		}
+		// Unseal first member first
+		unsealMember(vaultFirstPod, *unsealKeys)
 		for _, vaultPod := range vaultPods[1:] {
 			if err := operatorRaftJoin(vaultPod, vaultFirstPod); err != nil {
 				log.Error(err.Error())

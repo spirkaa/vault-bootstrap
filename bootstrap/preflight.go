@@ -37,11 +37,11 @@ func checkVaultStatus(pod vaultPod, c chan string) {
 		resp, err := http.Get(pod.fqdn + "/v1/sys/health")
 		if err != nil {
 			log.Debugf("%s: %s", pod.name, err.Error())
-			time.Sleep(3 * time.Second)
+			time.Sleep(1 * time.Second)
 			continue
 		} else if !find(vaultReadyStatusCodes, resp.StatusCode) {
 			log.Debugf("%s: HTTP Status %s", pod.name, strconv.Itoa(resp.StatusCode))
-			time.Sleep(3 * time.Second)
+			time.Sleep(1 * time.Second)
 			continue
 		}
 		c <- pod.name

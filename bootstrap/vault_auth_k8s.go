@@ -11,16 +11,16 @@ import (
 )
 
 func checkVaultUp(client *vault.Client) bool {
-	for i := 0; i < 5; i++ {
+	for i := 0; i < 15; i++ {
 		hr, err := client.Sys().Health()
 		if err != nil {
-			log.Warn(err.Error(), "k8s auth: Retrying in 3 seconds...")
-			time.Sleep(3 * time.Second)
+			log.Warn(err.Error(), "k8s auth: Retrying...")
+			time.Sleep(1 * time.Second)
 			continue
 		}
 		if !hr.Initialized || hr.Sealed {
 			log.Warn("k8s auth: Vault not Initialized/Unsealed. Retrying...")
-			time.Sleep(3 * time.Second)
+			time.Sleep(1 * time.Second)
 			continue
 		}
 		return true
