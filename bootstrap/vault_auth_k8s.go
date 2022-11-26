@@ -1,14 +1,12 @@
 package bootstrap
 
 import (
-	"context"
 	"fmt"
 	"os"
 	"time"
 
 	vault "github.com/hashicorp/vault/api"
 	log "github.com/sirupsen/logrus"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 )
 
@@ -51,44 +49,25 @@ func configureK8sAuth(client *vault.Client, clientsetK8s *kubernetes.Clientset) 
 		return err
 	}
 
-	saClient := clientsetK8s.CoreV1().ServiceAccounts(namespace)
-	saClientVault, err := saClient.Get(context.TODO(), vaultK8sAuthServiceAccount, metav1.GetOptions{})
-	if err != nil {
-		return fmt.Errorf("k8s auth: Cant't get service account - %s", err.Error())
-	}
-
-	secretSaVaultName := saClientVault.Secrets[0].Name
-	log.Info("k8s auth: Service account token name - ", secretSaVaultName)
-
-	secretSaVault, err := clientsetK8s.CoreV1().Secrets(namespace).Get(context.TODO(), secretSaVaultName, metav1.GetOptions{})
-	if err != nil {
-		return fmt.Errorf("k8s auth: Cant't get token for service account - %s", err.Error())
-	}
-	vaultJwt := secretSaVault.Data["token"]
-
-	// Fetch CA for connecting to k8s API
-	cacert, err := os.ReadFile("/var/run/secrets/kubernetes.io/serviceaccount/ca.crt")
-	if err != nil {
-		return err
-	}
-
 	// Get k8s API URL
-	k8sApiHost, ok := os.LookupEnv("KUBERNETES_PORT_443_TCP_ADDR")
+	const (
+		EnvK8sSvc  = "KUBERNETES_SERVICE_HOST"
+		EnvK8sPort = "KUBERNETES_SERVICE_PORT"
+	)
+	k8sSvc, ok := os.LookupEnv(EnvK8sSvc)
 	if !ok {
-		return fmt.Errorf("k8s auth: Invalid Kubernetes API config")
+		return fmt.Errorf("k8s auth: lookup of %s failed", EnvK8sSvc)
 	}
-
-	k8sApiUrl := fmt.Sprintf("https://%s:443", k8sApiHost)
-
-	// Prepare payload for configuring k8s authentication
-	data := map[string]interface{}{
-		"kubernetes_host":    k8sApiUrl,
-		"kubernetes_ca_cert": string(cacert),
-		"token_reviewer_jwt": string(vaultJwt),
+	k8sPort, ok := os.LookupEnv(EnvK8sPort)
+	if !ok {
+		return fmt.Errorf("k8s auth: lookup of %s failed", EnvK8sPort)
 	}
+	k8sHost := fmt.Sprintf("https://%s:%s", k8sSvc, k8sPort)
 
 	// Configure k8s authentication
-	_, err = client.Logical().Write("auth/kubernetes/config", data)
+	_, err = client.Logical().Write("auth/kubernetes/config", map[string]interface{}{
+		"kubernetes_host": k8sHost,
+	})
 	if err != nil {
 		return err
 	}
