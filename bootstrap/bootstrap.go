@@ -206,13 +206,13 @@ func Run() {
 		}
 
 		// add roles
-		roleFromVars := vaultSaRole{
-			vaultK8sAuthServiceAccount,
-			vaultK8sAuthServiceAccount,
-			namespace,
-		}
-		saRoles = append(saRoles, roleFromVars)
-		log.Infof("%s", saRoles)
+		// roleFromVars := vaultSaRole{
+		// 	vaultK8sAuthServiceAccount,
+		// 	vaultK8sAuthServiceAccount,
+		// 	namespace,
+		// }
+		// saRoles = append(saRoles, roleFromVars)
+		// log.Infof("%s", saRoles)
 		for _, role := range saRoles {
 			if err := addRole(clientLB, &role); err != nil {
 				log.Error(err.Error())

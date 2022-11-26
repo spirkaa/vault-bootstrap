@@ -9,6 +9,11 @@ import (
 
 var saRoles = []vaultSaRole{
 	{
+		name:        "external-secrets",
+		saName:      "external-secrets",
+		saNamespace: "external-secrets",
+	},
+	{
 		name:        "argocd-repo-server",
 		saName:      "argocd-repo-server",
 		saNamespace: "argocd",
