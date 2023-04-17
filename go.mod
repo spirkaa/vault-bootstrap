@@ -6,9 +6,9 @@ require (
 	github.com/google/uuid v1.3.0
 	github.com/hashicorp/vault/api v1.9.0
 	github.com/sirupsen/logrus v1.9.0
-	k8s.io/api v0.26.3
-	k8s.io/apimachinery v0.26.3
-	k8s.io/client-go v0.26.3
+	k8s.io/api v0.27.1
+	k8s.io/apimachinery v0.27.1
+	k8s.io/client-go v0.27.1
 )
 
 require (
